@@ -6,6 +6,7 @@ import { GitHubFile, CopilotCategory, CacheEntry, RepoSource } from './types';
 import { RepoStorage } from './repoStorage';
 import { StatusBarManager } from './statusBarManager';
 import { getLogger } from './logger';
+import { EXT_ID, HTTP_USER_AGENT } from './constants';
 
 
 export class GitHubService {
@@ -21,7 +22,7 @@ export class GitHubService {
 
     // Check if GitHub authentication is available and prompt if needed
     private async ensureGitHubAuth(isEnterprise: boolean = false): Promise<boolean> {
-        const config = vscode.workspace.getConfiguration('awesome-copilot');
+        const config = vscode.workspace.getConfiguration(EXT_ID);
         const enableAuth = config.get<boolean>('enableGithubAuth', true);
         
         if (!enableAuth) {
@@ -75,7 +76,7 @@ export class GitHubService {
         const statusCode = isAxiosError ? error.response?.status : undefined;
 
         if (statusCode === 401 || statusCode === 403) {
-            const config = vscode.workspace.getConfiguration('awesome-copilot');
+            const config = vscode.workspace.getConfiguration(EXT_ID);
             const enableAuth = config.get<boolean>('enableGithubAuth', true);
             
             if (!enableAuth) {
@@ -123,7 +124,7 @@ export class GitHubService {
     private createHttpsAgent(url: string): https.Agent | undefined {
         try {
             // Check security configuration
-            const config = vscode.workspace.getConfiguration('awesome-copilot');
+            const config = vscode.workspace.getConfiguration(EXT_ID);
             const allowInsecureEnterpriseCerts = config.get<boolean>('allowInsecureEnterpriseCerts', false);
 
             // If it's not github.com, treat as enterprise
@@ -155,12 +156,12 @@ export class GitHubService {
     // Create request headers with proper authentication for GitHub
     private async createRequestHeaders(isEnterprise: boolean = false): Promise<Record<string, string>> {
         const headers: Record<string, string> = {
-            'User-Agent': 'VSCode-AwesomeCopilot-Extension',
+            'User-Agent': HTTP_USER_AGENT,
             'Accept': 'application/vnd.github.v3+json'
         };
 
         // Try to authenticate for all GitHub requests (both public and enterprise)
-        const config = vscode.workspace.getConfiguration('awesome-copilot');
+        const config = vscode.workspace.getConfiguration(EXT_ID);
         const enableAuth = config.get<boolean>('enableGithubAuth', true);
         
         if (enableAuth) {
@@ -240,7 +241,7 @@ export class GitHubService {
                 }
 
                 let response;
-                const config = vscode.workspace.getConfiguration('awesome-copilot');
+                const config = vscode.workspace.getConfiguration(EXT_ID);
                 const allowInsecureEnterpriseCerts = config.get<boolean>('allowInsecureEnterpriseCerts', false);
 
                 try {
@@ -381,7 +382,7 @@ export class GitHubService {
             }
 
             let response;
-            const config = vscode.workspace.getConfiguration('awesome-copilot');
+            const config = vscode.workspace.getConfiguration(EXT_ID);
             const allowInsecureEnterpriseCerts = config.get<boolean>('allowInsecureEnterpriseCerts', false);
 
             if (isEnterprise && allowInsecureEnterpriseCerts) {
@@ -461,7 +462,7 @@ export class GitHubService {
             }
 
             let response;
-            const config = vscode.workspace.getConfiguration('awesome-copilot');
+            const config = vscode.workspace.getConfiguration(EXT_ID);
             const allowInsecureEnterpriseCerts = config.get<boolean>('allowInsecureEnterpriseCerts', false);
 
             if (isEnterprise && allowInsecureEnterpriseCerts) {
@@ -511,7 +512,7 @@ export class GitHubService {
             }
 
             let response;
-            const config = vscode.workspace.getConfiguration('awesome-copilot');
+            const config = vscode.workspace.getConfiguration(EXT_ID);
             const allowInsecureEnterpriseCerts = config.get<boolean>('allowInsecureEnterpriseCerts', false);
 
             if (isEnterprise && allowInsecureEnterpriseCerts) {

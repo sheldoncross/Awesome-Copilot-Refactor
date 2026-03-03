@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { EXT_ID } from './constants';
 
 /**
  * StatusBarManager handles displaying status messages in the VS Code status bar
@@ -11,7 +12,7 @@ export class StatusBarManager {
     constructor() {
         // Create status bar item with priority to position it appropriately
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-        this.statusBarItem.command = 'awesome-copilot.showStatusHistory';
+        this.statusBarItem.command = `${EXT_ID}.showStatusHistory`;
     }
 
     /**

@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { RepoSource } from './types';
 import { getLogger } from './logger';
+import { STORAGE_SOURCES_KEY, CFG_REPOSITORIES } from './constants';
 
-const STORAGE_KEY = 'awesomeCopilot.sources';
-const CONFIG_KEY = 'awesome-copilot.repositories';
+const STORAGE_KEY = STORAGE_SOURCES_KEY;
+const CONFIG_KEY = CFG_REPOSITORIES;
 const DEFAULT_SOURCES: RepoSource[] = [
   { owner: 'github', repo: 'awesome-copilot', label: 'Awesome Copilot' }
 ];

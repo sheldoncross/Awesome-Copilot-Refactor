@@ -1,6 +1,6 @@
 {
-  "name": "awesome-copilot",
-  "displayName": "Awesome Copilot",
+  "name": "prompt-library",
+  "displayName": "Prompt Library",
   "publisher": "timheuer",
   "author": {
     "name": "Tim Heuer"
@@ -14,45 +14,33 @@
   },
   "qna": "https://github.com/timheuer/vscode-awesome-copilot/issues",
   "homepage": "https://github.com/timheuer/vscode-awesome-copilot",
-  "description": "Browse and download instructions, prompts, chat modes, and agents from the Awesome Copilot community",
+  "description": "Browse and download instructions, prompts, chat modes, and agents from community repositories",
   "version": "0.0.0-placeholder",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.103.0"
   },
-  "badges": [
-    {
-      "url": "https://img.shields.io/visual-studio-marketplace/v/timheuer.vscode-awesome-copilot?label=VS%20Code%20Marketplace&color=brightgreen&logo=visualstudiocode",
-      "href": "https://marketplace.visualstudio.com/items?itemName=TimHeuer.vscode-awesome-copilot",
-      "description": "Current Version"
-    },
-    {
-      "url": "https://github.com/timheuer/vscode-awesome-copilot/actions/workflows/build.yaml/badge.svg",
-      "href": "https://github.com/timheuer/vscode-awesome-copilot/actions/workflows/build.yaml",
-      "description": "Build Status"
-    }
-  ],
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "onView:awesomeCopilotExplorer"
+    "onView:promptLibraryExplorer"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "awesomeCopilot",
-          "title": "Awesome Copilot",
-          "icon": "resources/awesome-copilot-dark.svg"
+          "id": "promptLibrary",
+          "title": "Prompt Library",
+          "icon": "resources/prompt-library-dark.svg"
         }
       ]
     },
     "configuration": {
-      "title": "Awesome Copilot",
+      "title": "Prompt Library",
       "properties": {
-        "awesome-copilot.repositories": {
+        "prompt-library.repositories": {
           "type": "array",
           "title": "Repositories",
           "description": "Configure GitHub repositories as content sources",
@@ -86,14 +74,14 @@
           },
           "scope": "application"
         },
-        "awesome-copilot.enterpriseToken": {
+        "prompt-library.enterpriseToken": {
           "type": "string",
           "default": "",
           "description": "Personal Access Token for GitHub Enterprise authentication",
           "scope": "application",
           "markdownDescription": "Required permissions: `repo`, `read:org`, `read:user`  \nCreate at: your-github-enterprise.com/settings/tokens"
         },
-        "awesome-copilot.cacheTimeout": {
+        "prompt-library.cacheTimeout": {
           "type": "number",
           "default": 3600000,
           "minimum": 60000,
@@ -101,26 +89,26 @@
           "description": "Cache duration in milliseconds (default: 1 hour)",
           "scope": "application"
         },
-        "awesome-copilot.autoRefresh": {
+        "prompt-library.autoRefresh": {
           "type": "boolean",
           "default": false,
           "description": "Automatically refresh content on VS Code startup",
           "scope": "application"
         },
-        "awesome-copilot.showTreeView": {
+        "prompt-library.showTreeView": {
           "type": "boolean",
           "default": true,
-          "description": "Show/hide the Awesome Copilot tree view in the Explorer panel",
+          "description": "Show/hide the Prompt Library tree view in the Explorer panel",
           "scope": "application"
         },
-        "awesome-copilot.allowInsecureEnterpriseCerts": {
+        "prompt-library.allowInsecureEnterpriseCerts": {
           "type": "boolean",
           "default": false,
           "description": "⚠️ SECURITY WARNING: Allow insecure certificates for Enterprise GitHub servers. Only enable this for trusted enterprise environments with self-signed certificates.",
           "scope": "application",
           "markdownDescription": "**⚠️ SECURITY WARNING:** This setting disables TLS certificate validation for Enterprise GitHub servers only. Only enable for trusted enterprise environments with self-signed certificates.  \n\n**Default: `false` (secure)**  \n\n**Note:** If you're getting certificate errors with enterprise GitHub, enable this temporarily to add your repository, then you can disable it again for better security."
         },
-        "awesome-copilot.enableGithubAuth": {
+        "prompt-library.enableGithubAuth": {
           "type": "boolean",
           "default": true,
           "description": "Enable GitHub authentication via VS Code to increase rate limits from 60 to 5,000 requests per hour",
@@ -128,7 +116,7 @@
           "title": "Enable GitHub Authentication",
           "markdownDescription": "**Enable GitHub Authentication**  \n\nWhen enabled, the extension will use VS Code's GitHub authentication to access the API with higher rate limits:  \n- **Authenticated:** 5,000 requests/hour  \n- **Unauthenticated:** 60 requests/hour  \n\nThe extension will prompt you to sign in when needed."
         },
-        "awesome-copilot.logLevel": {
+        "prompt-library.logLevel": {
           "type": "string",
           "enum": ["error", "warn", "info", "debug", "trace"],
           "enumDescriptions": [
@@ -139,11 +127,11 @@
             "Show all logging including trace information"
           ],
           "default": "info",
-          "description": "Set the logging level for the Awesome Copilot extension",
+          "description": "Set the logging level for the Prompt Library extension",
           "scope": "application",
           "title": "Log Level"
         },
-        "awesome-copilot.checkForUpdates": {
+        "prompt-library.checkForUpdates": {
           "type": "boolean",
           "default": true,
           "description": "Check for updates to downloaded items and notify when newer versions are available",
@@ -153,72 +141,72 @@
     },
     "commands": [
       {
-        "command": "awesome-copilot.refreshAwesomeCopilot",
+        "command": "prompt-library.refresh",
         "title": "Refresh",
         "icon": "$(refresh)"
       },
       {
-        "command": "awesome-copilot.downloadItem",
+        "command": "prompt-library.downloadItem",
         "title": "Download",
         "icon": "$(cloud-download)"
       },
       {
-        "command": "awesome-copilot.previewItem",
+        "command": "prompt-library.previewItem",
         "title": "Preview",
         "icon": "$(open-preview)"
       },
       {
-        "command": "awesome-copilot.manageSources",
-        "title": "Awesome Copilot: Manage Sources",
+        "command": "prompt-library.manageSources",
+        "title": "Prompt Library: Manage Sources",
         "icon": "$(repo)"
       },
       {
-        "command": "awesome-copilot.removeRepo",
+        "command": "prompt-library.removeRepo",
         "title": "Remove Repository",
         "icon": "$(trash)"
       },
       {
-        "command": "awesome-copilot.refreshRepo",
+        "command": "prompt-library.refreshRepo",
         "title": "Refresh Repository",
         "icon": "$(refresh)"
       },
       {
-        "command": "awesome-copilot.configureEnterpriseToken",
-        "title": "Awesome Copilot: Configure Enterprise Token",
+        "command": "prompt-library.configureEnterpriseToken",
+        "title": "Prompt Library: Configure Enterprise Token",
         "icon": "$(key)"
       },
       {
-        "command": "awesome-copilot.clearEnterpriseToken",
-        "title": "Awesome Copilot: Clear Enterprise Token",
+        "command": "prompt-library.clearEnterpriseToken",
+        "title": "Prompt Library: Clear Enterprise Token",
         "icon": "$(trash)"
       },
       {
-        "command": "awesome-copilot.toggleTreeView",
-        "title": "Awesome Copilot: Toggle Tree View",
+        "command": "prompt-library.toggleTreeView",
+        "title": "Prompt Library: Toggle Tree View",
         "icon": "$(eye)"
       },
       {
-        "command": "awesome-copilot.showTreeView",
-        "title": "Awesome Copilot: Show Tree View",
+        "command": "prompt-library.showTreeView",
+        "title": "Prompt Library: Show Tree View",
         "icon": "$(eye)"
       },
       {
-        "command": "awesome-copilot.hideTreeView",
-        "title": "Awesome Copilot: Hide Tree View",
+        "command": "prompt-library.hideTreeView",
+        "title": "Prompt Library: Hide Tree View",
         "icon": "$(eye-closed)"
       },
       {
-        "command": "awesome-copilot.signInToGitHub",
-        "title": "Awesome Copilot: Sign in to GitHub",
+        "command": "prompt-library.signInToGitHub",
+        "title": "Prompt Library: Sign in to GitHub",
         "icon": "$(github)"
       },
       {
-        "command": "awesome-copilot.signOutFromGitHub",
-        "title": "Awesome Copilot: Sign out from GitHub",
+        "command": "prompt-library.signOutFromGitHub",
+        "title": "Prompt Library: Sign out from GitHub",
         "icon": "$(sign-out)"
       },
       {
-        "command": "awesome-copilot.openRepoInBrowser",
+        "command": "prompt-library.openRepoInBrowser",
         "title": "Open Repository in Browser",
         "icon": "$(github)"
       }
@@ -226,61 +214,61 @@
     "views": {
       "explorer": [
         {
-          "id": "awesomeCopilotExplorer",
-          "name": "Awesome Copilot",
+          "id": "promptLibraryExplorer",
+          "name": "Prompt Library",
           "icon": "$(robot)"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "awesomeCopilotExplorer",
-        "contents": "No repositories configured.\n[Manage Sources](command:awesome-copilot.manageSources)\nBrowse and download instructions, prompts, chat modes, and agents from the Awesome Copilot community.",
-        "when": "config.awesome-copilot.showTreeView"
+        "view": "promptLibraryExplorer",
+        "contents": "No repositories configured.\n[Manage Sources](command:prompt-library.manageSources)\nBrowse and download instructions, prompts, chat modes, and agents from community repositories.",
+        "when": "config.prompt-library.showTreeView"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "awesome-copilot.refreshAwesomeCopilot",
-          "when": "view == awesomeCopilotExplorer",
+          "command": "prompt-library.refresh",
+          "when": "view == promptLibraryExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "awesome-copilot.manageSources",
-          "when": "view == awesomeCopilotExplorer",
+          "command": "prompt-library.manageSources",
+          "when": "view == promptLibraryExplorer",
           "group": "navigation@3"
         }
       ],
       "view/item/context": [
         {
-          "command": "awesome-copilot.downloadItem",
-          "when": "view == awesomeCopilotExplorer && viewItem == copilotFile",
+          "command": "prompt-library.downloadItem",
+          "when": "view == promptLibraryExplorer && viewItem == copilotFile",
           "group": "inline@1"
         },
         {
-          "command": "awesome-copilot.previewItem",
-          "when": "view == awesomeCopilotExplorer && viewItem == copilotFile",
+          "command": "prompt-library.previewItem",
+          "when": "view == promptLibraryExplorer && viewItem == copilotFile",
           "group": "inline@2"
         },
         {
-          "command": "awesome-copilot.openRepoInBrowser",
-          "when": "view == awesomeCopilotExplorer && viewItem == copilotRepo",
+          "command": "prompt-library.openRepoInBrowser",
+          "when": "view == promptLibraryExplorer && viewItem == copilotRepo",
           "group": "inline@1"
         },
         {
-          "command": "awesome-copilot.refreshRepo",
-          "when": "view == awesomeCopilotExplorer && viewItem == copilotRepo",
+          "command": "prompt-library.refreshRepo",
+          "when": "view == promptLibraryExplorer && viewItem == copilotRepo",
           "group": "inline@2"
         },
         {
-          "command": "awesome-copilot.removeRepo",
-          "when": "view == awesomeCopilotExplorer && viewItem == copilotRepo",
+          "command": "prompt-library.removeRepo",
+          "when": "view == promptLibraryExplorer && viewItem == copilotRepo",
           "group": "inline@3"
         },
         {
-          "command": "awesome-copilot.removeRepo",
-          "when": "view == awesomeCopilotExplorer && viewItem == copilotRepo",
+          "command": "prompt-library.removeRepo",
+          "when": "view == promptLibraryExplorer && viewItem == copilotRepo",
           "group": "1_repo@1"
         }
       ]

@@ -1,5 +1,5 @@
 /**
- * Types and interfaces for the Awesome Copilot Browser extension
+ * Types and interfaces for the Prompt Library extension
  */
 
 

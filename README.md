@@ -1,13 +1,6 @@
-# Awesome GitHub Copilot Browser
+# Prompt Library
 
-A VS Code extension that allows you to browse, preview, and download GitHub Copilot customizations from the [awesome-copilot repository](https://github.com/github/awesome-copilot).
-
-[![VS Marketplace Badge](https://img.shields.io/visual-studio-marketplace/v/timheuer.awesome-copilot?label=VS%20Code%20Marketplace&color=brightgreen&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=timheuer.awesome-copilot) [![Visual Studio Marketplace Rating](https://img.shields.io/visual-studio-marketplace/r/timheuer.awesome-copilot?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=timheuer.awesome-copilot) [![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/timheuer.awesome-copilot?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=timheuer.awesome-copilot) [![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/timheuer.awesome-copilot?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=timheuer.awesome-copilot) [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/timheuer.awesome-copilot?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=timheuer.awesome-copilot) [![Visual Studio Marketplace Last Updated](https://img.shields.io/visual-studio-marketplace/last-updated/timheuer.awesome-copilot?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=timheuer.awesome-copilot) [![Visual Studio Marketplace Release Date](https://img.shields.io/visual-studio-marketplace/release-date/timheuer.awesome-copilot?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=timheuer.awesome-copilot)
-
-## Install in VS Code
-
-[![Install in VS Code](https://img.shields.io/badge/Install%20in-VS%20Code-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode:extension/timheuer.awesome-copilot)
-[![Install in VS Code Insiders](https://img.shields.io/badge/Install%20in-VS%20Code%20Insiders-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode-insiders:extension/timheuer.awesome-copilot)
+A VS Code extension that allows you to browse, preview, and download GitHub Copilot customizations from community repositories, including the [awesome-copilot repository](https://github.com/github/awesome-copilot).
 
 ## Features
 
@@ -19,7 +12,7 @@ A VS Code extension that allows you to browse, preview, and download GitHub Copi
 
 ## How to Use
 
-1. **Open the Extension**: Click the new Activity Bar icon (checkmark document) titled **Awesome Copilot**. (Previously this view appeared under Explorer; it now has its own dedicated container with a proper icon.)
+1. **Open the Extension**: Click the **Prompt Library** icon in the Activity Bar.
 2. **Browse Categories**: Expand Chat Modes, Instructions, Prompts, Agents, or Skills sections
 3. **Preview Content**: Click the preview icon on any file to see its content
 4. **Download Files**: Click the download icon to save files to your workspace
@@ -69,7 +62,7 @@ npm install
 npm run compile
 ```
 
-### Testing  
+### Testing
 
 ```bash
 npm run test
@@ -77,11 +70,9 @@ npm run test
 
 ## UI Placement / Custom View Container
 
-The extension contributes a custom Activity Bar view container named **Awesome Copilot**. If you prefer to move or hide it:
+The extension contributes a custom Activity Bar view container named **Prompt Library**. If you prefer to move or hide it:
 
 - Right-click the Activity Bar to toggle visibility.
 - Drag the view into a different location if desired (VS Code will persist your layout).
 
-If you previously dragged the old Explorer-based view into the Activity Bar and saw a generic label/icon, this update fixes that by supplying a dedicated container with themed icons (light/dark).
-
-**Enjoy browsing and using awesome GitHub Copilot customizations!**
+**Enjoy browsing and downloading community Copilot customizations!**

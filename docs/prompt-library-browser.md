@@ -1,12 +1,12 @@
-# Feature Specification: Awesome GitHub Copilot Browser
+# Feature Specification: Prompt Library Browser
 
 ## Overview
 
-A VS Code extension that provides an explorer view to browse, preview, and download GitHub Copilot customizations (chat modes, instructions, prompts, and agents) from the awesome-copilot repository. Users can filter items by filename, preview content, and selectively download files to their workspace with proper GitHub Copilot folder structure.
+A VS Code extension that provides an explorer view to browse, preview, and download GitHub Copilot customizations (chat modes, instructions, prompts, and agents) from community repositories such as the awesome-copilot repository. Users can filter items by filename, preview content, and selectively download files to their workspace with proper GitHub Copilot folder structure.
 
 ## User Journey
 
-1. **Open Explorer View**: User opens the "Awesome Copilot" view in the VS Code Explorer panel
+1. **Open Explorer View**: User opens the **Prompt Library** view in the VS Code Explorer panel
 2. **Browse Categories**: User sees four expandable sections: Chat Modes, Instructions, Prompts, and Agents
 3. **Filter Content**: User types in filter textbox to narrow down items by filename
 4. **Preview Item**: User clicks on an item to see name and content preview
@@ -17,7 +17,7 @@ A VS Code extension that provides an explorer view to browse, preview, and downl
 ## Functional Requirements
 
 1. **FR-01**: Explorer View Integration
-   - **Description**: Display a new tree view in VS Code Explorer panel titled "Awesome Copilot"
+   - **Description**: Display a new tree view in VS Code Explorer panel titled "Prompt Library"
    - **Acceptance Criteria**:
      - [ ] Tree view appears in Explorer panel alongside existing views
      - [ ] View shows four main categories: Chat Modes, Instructions, Prompts, and Agents

@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import { CopilotItem, RepoSource } from './types';
 import { getLogger } from './logger';
+import { STORAGE_DOWNLOADS_KEY } from './constants';
 
-const DOWNLOADS_STORAGE_KEY = 'awesomeCopilot.downloads';
+const DOWNLOADS_STORAGE_KEY = STORAGE_DOWNLOADS_KEY;
 
 export interface DownloadMetadata {
     itemId: string;

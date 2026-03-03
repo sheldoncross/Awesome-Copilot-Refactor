@@ -18,12 +18,11 @@ const MOCK_REPO = { owner: 'test-owner', repo: 'test-repo', label: 'Test Repo' }
 suite('PromptLibraryTreeItem — file item', () => {
     test('sets contextValue to "copilotFile"', () => {
         const file = createMockGitHubFile();
-        const item: Parameters<typeof PromptLibraryTreeItem>[0] = 'test.md' as unknown as string;
         const treeItem = new PromptLibraryTreeItem(
             'test.md',
             vscode.TreeItemCollapsibleState.None,
             'file',
-            { id: '1', name: 'test.md', category: CopilotCategory.Prompts, file: file as any, repo: MOCK_REPO }
+            { id: '1', name: 'test.md', category: CopilotCategory.Instructions, file: file as any, repo: MOCK_REPO }
         );
         assert.strictEqual(treeItem.contextValue, 'copilotFile');
     });
@@ -39,32 +38,51 @@ suite('PromptLibraryTreeItem — file item', () => {
         assert.ok(
             treeItem.iconPath instanceof vscode.ThemeIcon &&
             (treeItem.iconPath as vscode.ThemeIcon).id === 'folder',
-            'Skill folder items must use the "folder" icon'
+            'Skill bundle items must use the "folder" icon'
         );
     });
 
-    test('uses lightbulb icon for Prompts files', () => {
-        const file = createMockGitHubFile();
+    test('uses folder icon for Plugins directory items', () => {
+        const file = createMockGitHubFile({ type: 'dir' });
         const treeItem = new PromptLibraryTreeItem(
-            'my-prompt.md',
+            'my-plugin',
             vscode.TreeItemCollapsibleState.None,
             'file',
-            { id: '3', name: 'my-prompt.md', category: CopilotCategory.Prompts, file: file as any, repo: MOCK_REPO }
+            { id: '3', name: 'my-plugin', category: CopilotCategory.Plugins, file: file as any, repo: MOCK_REPO }
         );
-        const icon = treeItem.iconPath as vscode.ThemeIcon;
-        assert.strictEqual(icon.id, 'lightbulb');
+        assert.ok(
+            treeItem.iconPath instanceof vscode.ThemeIcon &&
+            (treeItem.iconPath as vscode.ThemeIcon).id === 'folder',
+            'Plugin bundle items must use the "folder" icon'
+        );
     });
 
-    test('uses comment-discussion icon for ChatModes files', () => {
-        const file = createMockGitHubFile();
+    test('bundle description includes category label for Skills', () => {
+        const file = createMockGitHubFile({ type: 'dir' });
         const treeItem = new PromptLibraryTreeItem(
-            'chat.chatmode.md',
+            'my-skill',
             vscode.TreeItemCollapsibleState.None,
             'file',
-            { id: '4', name: 'chat.chatmode.md', category: CopilotCategory.ChatModes, file: file as any, repo: MOCK_REPO }
+            { id: '10', name: 'my-skill', category: CopilotCategory.Skills, file: file as any, repo: MOCK_REPO }
         );
-        const icon = treeItem.iconPath as vscode.ThemeIcon;
-        assert.strictEqual(icon.id, 'comment-discussion');
+        assert.ok(
+            typeof treeItem.description === 'string' && treeItem.description.includes('Skills'),
+            `description "${treeItem.description}" must mention the category label`
+        );
+    });
+
+    test('bundle description includes category label for Plugins', () => {
+        const file = createMockGitHubFile({ type: 'dir' });
+        const treeItem = new PromptLibraryTreeItem(
+            'my-plugin',
+            vscode.TreeItemCollapsibleState.None,
+            'file',
+            { id: '11', name: 'my-plugin', category: CopilotCategory.Plugins, file: file as any, repo: MOCK_REPO }
+        );
+        assert.ok(
+            typeof treeItem.description === 'string' && treeItem.description.includes('Plugins'),
+            `description "${treeItem.description}" must mention the category label`
+        );
     });
 
     test('uses book icon for Instructions files', () => {
@@ -73,7 +91,7 @@ suite('PromptLibraryTreeItem — file item', () => {
             'style.md',
             vscode.TreeItemCollapsibleState.None,
             'file',
-            { id: '5', name: 'style.md', category: CopilotCategory.Instructions, file: file as any, repo: MOCK_REPO }
+            { id: '4', name: 'style.md', category: CopilotCategory.Instructions, file: file as any, repo: MOCK_REPO }
         );
         assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'book');
     });
@@ -84,9 +102,53 @@ suite('PromptLibraryTreeItem — file item', () => {
             'agent.md',
             vscode.TreeItemCollapsibleState.None,
             'file',
-            { id: '6', name: 'agent.md', category: CopilotCategory.Agents, file: file as any, repo: MOCK_REPO }
+            { id: '5', name: 'agent.md', category: CopilotCategory.Agents, file: file as any, repo: MOCK_REPO }
         );
         assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'robot');
+    });
+
+    test('uses zap icon for Hooks files', () => {
+        const file = createMockGitHubFile();
+        const treeItem = new PromptLibraryTreeItem(
+            'pre-push.sh',
+            vscode.TreeItemCollapsibleState.None,
+            'file',
+            { id: '6', name: 'pre-push.sh', category: CopilotCategory.Hooks, file: file as any, repo: MOCK_REPO }
+        );
+        assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'zap');
+    });
+
+    test('uses git-merge icon for Workflows files', () => {
+        const file = createMockGitHubFile();
+        const treeItem = new PromptLibraryTreeItem(
+            'review.yml',
+            vscode.TreeItemCollapsibleState.None,
+            'file',
+            { id: '7', name: 'review.yml', category: CopilotCategory.Workflows, file: file as any, repo: MOCK_REPO }
+        );
+        assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'git-merge');
+    });
+
+    test('uses terminal icon for Scripts files', () => {
+        const file = createMockGitHubFile();
+        const treeItem = new PromptLibraryTreeItem(
+            'setup.sh',
+            vscode.TreeItemCollapsibleState.None,
+            'file',
+            { id: '8', name: 'setup.sh', category: CopilotCategory.Scripts, file: file as any, repo: MOCK_REPO }
+        );
+        assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'terminal');
+    });
+
+    test('uses tools icon for Skills files (non-dir items)', () => {
+        const file = createMockGitHubFile(); // type: 'file'
+        const treeItem = new PromptLibraryTreeItem(
+            'readme.md',
+            vscode.TreeItemCollapsibleState.None,
+            'file',
+            { id: '9', name: 'readme.md', category: CopilotCategory.Skills, file: file as any, repo: MOCK_REPO }
+        );
+        assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'tools');
     });
 
     test('description shows file size in KB for regular files', () => {
@@ -95,7 +157,7 @@ suite('PromptLibraryTreeItem — file item', () => {
             'big.md',
             vscode.TreeItemCollapsibleState.None,
             'file',
-            { id: '7', name: 'big.md', category: CopilotCategory.Prompts, file: file as any, repo: MOCK_REPO }
+            { id: '20', name: 'big.md', category: CopilotCategory.Instructions, file: file as any, repo: MOCK_REPO }
         );
         assert.ok(
             typeof treeItem.description === 'string' && treeItem.description.includes('KB'),
@@ -107,11 +169,11 @@ suite('PromptLibraryTreeItem — file item', () => {
 suite('PromptLibraryTreeItem — category item', () => {
     test('sets contextValue to "copilotCategory"', () => {
         const treeItem = new PromptLibraryTreeItem(
-            'Prompts',
+            'Instructions',
             vscode.TreeItemCollapsibleState.Collapsed,
             'category',
             undefined,
-            CopilotCategory.Prompts,
+            CopilotCategory.Instructions,
             MOCK_REPO
         );
         assert.strictEqual(treeItem.contextValue, 'copilotCategory');
@@ -283,11 +345,11 @@ suite('PromptLibraryProvider — getChildren() category level', () => {
 
     test('returns file items fetched from GitHubService', async () => {
         const categoryItem = new PromptLibraryTreeItem(
-            'Prompts',
+            'Instructions',
             vscode.TreeItemCollapsibleState.Collapsed,
             'category',
             undefined,
-            CopilotCategory.Prompts,
+            CopilotCategory.Instructions,
             MOCK_REPO
         );
 

@@ -2,7 +2,7 @@
 import axios from 'axios';
 import * as vscode from 'vscode';
 import * as https from 'https';
-import { GitHubFile, CopilotCategory, CacheEntry, RepoSource } from './types';
+import { GitHubFile, CopilotCategory, CATEGORY_SHOWS_DIRS, CacheEntry, RepoSource } from './types';
 import { RepoStorage } from './repoStorage';
 import { StatusBarManager } from './statusBarManager';
 import { getLogger } from './logger';
@@ -291,13 +291,10 @@ export class GitHubService {
                     }
                 }
 
-                // For Skills category, show directories (folders); for other categories, show files
+                // Directory-bundle categories (e.g. Skills, Plugins) surface dirs; all others surface files
                 const files = (response.data as GitHubFile[])
                     .filter((file: GitHubFile) => {
-                        if (category === CopilotCategory.Skills) {
-                            return file.type === 'dir';
-                        }
-                        return file.type === 'file';
+                        return CATEGORY_SHOWS_DIRS.has(category) ? file.type === 'dir' : file.type === 'file';
                     })
                     .map(f => ({ ...f, repo }));
                 this.cache.set(cacheKey, {

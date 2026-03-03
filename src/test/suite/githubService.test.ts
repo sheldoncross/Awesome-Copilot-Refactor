@@ -65,7 +65,7 @@ suite('GitHubService — clearCache()', () => {
     teardown(() => sinon.restore());
 
     test('resets getCacheStatus() back to "Cache empty"', async () => {
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
         assert.notStrictEqual(service.getCacheStatus(), 'Cache empty');
 
         service.clearCache();
@@ -88,16 +88,16 @@ suite('GitHubService — clearRepoCache()', () => {
         const repoA = { owner: 'org-a', repo: 'repo-a' };
         const repoB = { owner: 'org-b', repo: 'repo-b' };
 
-        await service.getFilesByRepo(repoA, CopilotCategory.Prompts);
-        await service.getFilesByRepo(repoB, CopilotCategory.Prompts);
+        await service.getFilesByRepo(repoA, CopilotCategory.Instructions);
+        await service.getFilesByRepo(repoB, CopilotCategory.Instructions);
 
         const callsBefore = stub.callCount;
         service.clearRepoCache(repoA);
 
         // repoA must be refetched (cache cleared)
-        await service.getFilesByRepo(repoA, CopilotCategory.Prompts);
+        await service.getFilesByRepo(repoA, CopilotCategory.Instructions);
         // repoB must come from cache (no extra call)
-        await service.getFilesByRepo(repoB, CopilotCategory.Prompts);
+        await service.getFilesByRepo(repoB, CopilotCategory.Instructions);
 
         assert.strictEqual(stub.callCount, callsBefore + 1,
             'Only repoA should trigger a network call after clearRepoCache(repoA)');
@@ -116,35 +116,35 @@ suite('GitHubService — getFilesByRepo() caching', () => {
     teardown(() => sinon.restore());
 
     test('makes exactly one HTTP request on first call', async () => {
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
         assert.strictEqual(stub.callCount, 1);
     });
 
     test('returns cached data on second call without a network request', async () => {
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
         assert.strictEqual(stub.callCount, 1, 'Second call must be served from cache');
     });
 
     test('bypasses cache when forceRefresh is true', async () => {
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts, true);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions, true);
         assert.strictEqual(stub.callCount, 2, 'forceRefresh must bypass the cache');
     });
 
     test('different categories are cached independently', async () => {
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
         await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Agents);
         assert.strictEqual(stub.callCount, 2, 'Each category must have its own cache entry');
     });
 
     test('returns file objects from the response', async () => {
-        const file = mockFileResponse({ name: 'my-prompt.md', size: 512 });
+        const file = mockFileResponse({ name: 'my-instructions.md', size: 512 });
         stub.callsFake(() => axiosOk([file]));
 
-        const files = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
+        const files = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
         assert.strictEqual(files.length, 1);
-        assert.strictEqual(files[0].name, 'my-prompt.md');
+        assert.strictEqual(files[0].name, 'my-instructions.md');
     });
 });
 
@@ -160,11 +160,11 @@ suite('GitHubService — getFilesByRepo() URL construction', () => {
     teardown(() => sinon.restore());
 
     test('calls the public GitHub API URL for a standard repo', async () => {
-        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
+        await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
         const calledUrl: string = stub.firstCall.args[0];
         assert.ok(calledUrl.startsWith('https://api.github.com/'),
             `Expected public API URL, got: ${calledUrl}`);
-        assert.ok(calledUrl.includes('/github/awesome-copilot/contents/prompts'));
+        assert.ok(calledUrl.includes('/github/awesome-copilot/contents/instructions'));
     });
 
     test('calls the enterprise /api/v3 URL when baseUrl is provided', async () => {
@@ -176,7 +176,7 @@ suite('GitHubService — getFilesByRepo() URL construction', () => {
     });
 
     test('category value is used verbatim as the path segment', async () => {
-        for (const cat of [CopilotCategory.ChatModes, CopilotCategory.Agents, CopilotCategory.Skills]) {
+        for (const cat of [CopilotCategory.Hooks, CopilotCategory.Workflows, CopilotCategory.Agents, CopilotCategory.Scripts]) {
             stub.resetHistory();
             stub.callsFake(() => axiosOk([]));
             await service.getFilesByRepo(PUBLIC_REPO, cat, true);
@@ -200,7 +200,7 @@ suite('GitHubService — getFilesByRepo() error handling', () => {
 
     test('returns empty array on 404 (folder does not exist in repo)', async () => {
         stub.callsFake(() => axiosErr(404));
-        const files = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.ChatModes);
+        const files = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Hooks);
         assert.deepStrictEqual(files, [],
             '404 must produce an empty array, not throw');
     });
@@ -208,16 +208,21 @@ suite('GitHubService — getFilesByRepo() error handling', () => {
     test('throws for non-404 errors (e.g. 500)', async () => {
         stub.callsFake(() => axiosErr(500));
         await assert.rejects(
-            () => service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts),
+            () => service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions),
             /500|Failed to load/,
             '500-level errors must be re-thrown'
         );
     });
 });
 
-suite('GitHubService — Skills category filtering', () => {
+suite('GitHubService — directory-bundle category filtering', () => {
     let service: GitHubService;
     let stub: sinon.SinonStub;
+
+    const mixedResponse = () => [
+        { ...mockFileResponse(), type: 'file' },
+        { ...mockFileResponse({ name: 'a-bundle' }), type: 'dir' },
+    ];
 
     setup(() => {
         service = new GitHubService();
@@ -227,24 +232,51 @@ suite('GitHubService — Skills category filtering', () => {
     teardown(() => sinon.restore());
 
     test('returns only directory entries for Skills', async () => {
-        stub.callsFake(() => axiosOk([
-            { ...mockFileResponse(), type: 'file' },
-            { ...mockFileResponse({ name: 'my-skill' }), type: 'dir' },
-        ]));
-
+        stub.callsFake(() => axiosOk(mixedResponse()));
         const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Skills);
         assert.strictEqual(results.length, 1, 'Skills must return only directories');
         assert.strictEqual(results[0].type, 'dir');
     });
 
-    test('returns only file entries for non-Skills categories', async () => {
-        stub.callsFake(() => axiosOk([
-            { ...mockFileResponse(), type: 'file' },
-            { ...mockFileResponse({ name: 'a-folder' }), type: 'dir' },
-        ]));
+    test('returns only directory entries for Plugins', async () => {
+        stub.callsFake(() => axiosOk(mixedResponse()));
+        const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Plugins);
+        assert.strictEqual(results.length, 1, 'Plugins must return only directories');
+        assert.strictEqual(results[0].type, 'dir');
+    });
 
-        const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Prompts);
-        assert.strictEqual(results.length, 1, 'Non-Skills categories must return only files');
+    test('returns only file entries for Instructions', async () => {
+        stub.callsFake(() => axiosOk(mixedResponse()));
+        const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Instructions);
+        assert.strictEqual(results.length, 1, 'Instructions must return only files');
+        assert.strictEqual(results[0].type, 'file');
+    });
+
+    test('returns only file entries for Agents', async () => {
+        stub.callsFake(() => axiosOk(mixedResponse()));
+        const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Agents);
+        assert.strictEqual(results.length, 1, 'Agents must return only files');
+        assert.strictEqual(results[0].type, 'file');
+    });
+
+    test('returns only file entries for Hooks', async () => {
+        stub.callsFake(() => axiosOk(mixedResponse()));
+        const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Hooks);
+        assert.strictEqual(results.length, 1, 'Hooks must return only files');
+        assert.strictEqual(results[0].type, 'file');
+    });
+
+    test('returns only file entries for Workflows', async () => {
+        stub.callsFake(() => axiosOk(mixedResponse()));
+        const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Workflows);
+        assert.strictEqual(results.length, 1, 'Workflows must return only files');
+        assert.strictEqual(results[0].type, 'file');
+    });
+
+    test('returns only file entries for Scripts', async () => {
+        stub.callsFake(() => axiosOk(mixedResponse()));
+        const results = await service.getFilesByRepo(PUBLIC_REPO, CopilotCategory.Scripts);
+        assert.strictEqual(results.length, 1, 'Scripts must return only files');
         assert.strictEqual(results[0].type, 'file');
     });
 });

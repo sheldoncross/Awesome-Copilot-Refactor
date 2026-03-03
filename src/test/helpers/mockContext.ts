@@ -60,8 +60,8 @@ export function createMockExtensionContext(): vscode.ExtensionContext {
 export function createMockGitHubFile(overrides: Record<string, unknown> = {}) {
     return {
         name: 'test-file.md',
-        path: 'prompts/test-file.md',
-        download_url: 'https://raw.githubusercontent.com/github/awesome-copilot/main/prompts/test-file.md',
+        path: 'instructions/test-file.md',
+        download_url: 'https://raw.githubusercontent.com/github/awesome-copilot/main/instructions/test-file.md',
         size: 1024,
         type: 'file' as const,
         sha: 'abc123def456',

@@ -11,7 +11,7 @@ import {
 } from './constants';
 import { GitHubService } from './githubService';
 import { CopilotPreviewProvider } from './previewProvider';
-import { CopilotItem, FOLDER_PATHS, CopilotCategory } from './types';
+import { CopilotItem, FOLDER_PATHS, CopilotCategory, CATEGORY_SHOWS_DIRS } from './types';
 import * as path from 'path';
 import * as fs from 'fs';
 import { RepoStorage } from './repoStorage';
@@ -173,7 +173,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				// Validate repo structure (check that at least one content folder exists)
 				try {
-					const cats = ['chatmodes', 'instructions', 'prompts', 'agents', 'skills'];
+					const cats = Object.values(CopilotCategory);
 					const foundFolders: string[] = [];
 					const missingFolders: string[] = [];
 
@@ -394,7 +394,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						});
 
 						const retryChoice = await vscode.window.showErrorMessage(
-							`🔍 Repository Not Found or No Valid Content\n\nThe repository ${owner}/${repo} was not found or doesn't contain any of the required content folders (chatmodes, instructions, prompts).\n\nPlease verify:\n1. Repository exists at: ${repoUrl}\n2. Repository is public or you have access\n3. Repository contains at least one of: chatmodes, instructions, or prompts folders\n\nNote: A repository only needs to have ONE of these folders, not all of them.\n\nDebug: Input="${input}", Owner="${owner}", Repo="${repo}"`,
+							`🔍 Repository Not Found or No Valid Content\n\nThe repository ${owner}/${repo} was not found or doesn't contain any of the required content folders (instructions, agents, hooks, workflows, plugins, scripts, skills).\n\nPlease verify:\n1. Repository exists at: ${repoUrl}\n2. Repository is public or you have access\n3. Repository contains at least one of the expected top-level folders\n\nNote: A repository only needs to have ONE of these folders, not all of them.\n\nDebug: Input="${input}", Owner="${owner}", Repo="${repo}"`,
 							'Check Repository',
 							'Retry',
 							'Cancel'
@@ -784,8 +784,8 @@ async function downloadCopilotItem(item: CopilotItem, githubService: GitHubServi
 		const targetFolder = FOLDER_PATHS[item.category];
 		const fullTargetPath = path.join(workspaceFolder.uri.fsPath, targetFolder);
 
-		// Skills are folders - handle them differently
-		if (item.category === CopilotCategory.Skills && item.file.type === 'dir') {
+		// Directory-bundle categories (Skills, Plugins) are folders — handle them differently
+		if (CATEGORY_SHOWS_DIRS.has(item.category) && item.file.type === 'dir') {
 			// Show input box for folder name confirmation
 			const folderName = await vscode.window.showInputBox({
 				prompt: `Download skill folder ${item.name} to ${targetFolder}`,
@@ -931,8 +931,8 @@ async function downloadCopilotItem(item: CopilotItem, githubService: GitHubServi
 
 async function previewCopilotItem(item: CopilotItem, githubService: GitHubService, previewProvider: CopilotPreviewProvider): Promise<void> {
 	try {
-		// For Skills folders, preview the SKILL.md file
-		if (item.category === CopilotCategory.Skills && item.file.type === 'dir') {
+		// For directory-bundle categories (Skills, Plugins), preview the SKILL.md file
+		if (CATEGORY_SHOWS_DIRS.has(item.category) && item.file.type === 'dir') {
 			// Get the contents of the skill folder
 			const contents = await githubService.getDirectoryContents(item.repo, item.file.path);
 			

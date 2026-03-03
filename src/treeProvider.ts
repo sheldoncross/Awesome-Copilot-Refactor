@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { GitHubService } from './githubService';
-import { CopilotItem, CopilotCategory, CATEGORY_LABELS, FOLDER_PATHS, GitHubFile, RepoSource } from './types';
+import { CopilotItem, CopilotCategory, CATEGORY_LABELS, CATEGORY_SHOWS_DIRS, FOLDER_PATHS, GitHubFile, RepoSource } from './types';
 import { RepoStorage } from './repoStorage';
 import { getLogger } from './logger';
 import { DownloadTracker } from './downloadTracker';
@@ -36,12 +36,13 @@ export class PromptLibraryTreeItem extends vscode.TreeItem {
 
         if (itemType === 'file' && copilotItem) {
             this.contextValue = 'copilotFile';
-            
-            // Skills are folders, not individual files
-            if (copilotItem.category === CopilotCategory.Skills && copilotItem.file.type === 'dir') {
-                this.description = 'Skill Folder';
+
+            // Some categories (Skills, Plugins) surface directory bundles rather than individual files
+            if (CATEGORY_SHOWS_DIRS.has(copilotItem.category) && copilotItem.file.type === 'dir') {
+                const categoryLabel = CATEGORY_LABELS[copilotItem.category];
+                this.description = `${categoryLabel} Bundle`;
                 this.tooltip = new vscode.MarkdownString(
-                    `**${copilotItem.name}**\n\nType: Skill Folder\nRepo: ${copilotItem.repo ? copilotItem.repo.owner + '/' + copilotItem.repo.repo : ''}\n\nClick to preview or download entire skill folder`
+                    `**${copilotItem.name}**\n\nType: ${categoryLabel} Bundle\nRepo: ${copilotItem.repo ? copilotItem.repo.owner + '/' + copilotItem.repo.repo : ''}\n\nClick to preview or download entire bundle`
                 );
                 this.iconPath = new vscode.ThemeIcon('folder');
             } else {
@@ -52,17 +53,23 @@ export class PromptLibraryTreeItem extends vscode.TreeItem {
                 );
                 // Set appropriate icon based on category
                 switch (copilotItem.category) {
-                    case CopilotCategory.ChatModes:
-                        this.iconPath = new vscode.ThemeIcon('comment-discussion');
-                        break;
                     case CopilotCategory.Instructions:
                         this.iconPath = new vscode.ThemeIcon('book');
                         break;
-                    case CopilotCategory.Prompts:
-                        this.iconPath = new vscode.ThemeIcon('lightbulb');
-                        break;
                     case CopilotCategory.Agents:
                         this.iconPath = new vscode.ThemeIcon('robot');
+                        break;
+                    case CopilotCategory.Hooks:
+                        this.iconPath = new vscode.ThemeIcon('zap');
+                        break;
+                    case CopilotCategory.Workflows:
+                        this.iconPath = new vscode.ThemeIcon('git-merge');
+                        break;
+                    case CopilotCategory.Plugins:
+                        this.iconPath = new vscode.ThemeIcon('extensions');
+                        break;
+                    case CopilotCategory.Scripts:
+                        this.iconPath = new vscode.ThemeIcon('terminal');
                         break;
                     case CopilotCategory.Skills:
                         this.iconPath = new vscode.ThemeIcon('tools');
@@ -150,7 +157,7 @@ export class PromptLibraryProvider implements vscode.TreeDataProvider<PromptLibr
         }
 
         const repoData = this.repoItems.get(repoKey)!;
-        const categories = [CopilotCategory.ChatModes, CopilotCategory.Instructions, CopilotCategory.Prompts, CopilotCategory.Agents, CopilotCategory.Skills];
+        const categories = Object.values(CopilotCategory);
 
         const allItems: CopilotItem[] = [];
 
@@ -217,49 +224,18 @@ export class PromptLibraryProvider implements vscode.TreeDataProvider<PromptLibr
         }
 
         if (element.itemType === 'repo' && element.repo) {
-            // Return categories for this repository
-            return [
+            // Return one category item per CopilotCategory — driven by the enum so adding a new
+            // category only requires updating types.ts, not this function.
+            return Object.values(CopilotCategory).map(category =>
                 new PromptLibraryTreeItem(
-                    CATEGORY_LABELS[CopilotCategory.ChatModes],
+                    CATEGORY_LABELS[category],
                     vscode.TreeItemCollapsibleState.Collapsed,
                     'category',
                     undefined,
-                    CopilotCategory.ChatModes,
-                    element.repo
-                ),
-                new PromptLibraryTreeItem(
-                    CATEGORY_LABELS[CopilotCategory.Instructions],
-                    vscode.TreeItemCollapsibleState.Collapsed,
-                    'category',
-                    undefined,
-                    CopilotCategory.Instructions,
-                    element.repo
-                ),
-                new PromptLibraryTreeItem(
-                    CATEGORY_LABELS[CopilotCategory.Prompts],
-                    vscode.TreeItemCollapsibleState.Collapsed,
-                    'category',
-                    undefined,
-                    CopilotCategory.Prompts,
-                    element.repo
-                ),
-                new PromptLibraryTreeItem(
-                    CATEGORY_LABELS[CopilotCategory.Agents],
-                    vscode.TreeItemCollapsibleState.Collapsed,
-                    'category',
-                    undefined,
-                    CopilotCategory.Agents,
-                    element.repo
-                ),
-                new PromptLibraryTreeItem(
-                    CATEGORY_LABELS[CopilotCategory.Skills],
-                    vscode.TreeItemCollapsibleState.Collapsed,
-                    'category',
-                    undefined,
-                    CopilotCategory.Skills,
+                    category,
                     element.repo
                 )
-            ];
+            );
         }
 
         if (element.itemType === 'category' && element.category && element.repo) {
@@ -333,7 +309,7 @@ export class PromptLibraryProvider implements vscode.TreeDataProvider<PromptLibr
         }
 
         const repos = RepoStorage.getSources(this.context);
-        const categories = [CopilotCategory.ChatModes, CopilotCategory.Instructions, CopilotCategory.Prompts, CopilotCategory.Agents, CopilotCategory.Skills];
+        const categories = Object.values(CopilotCategory);
 
         // Collect all items for update checking
         const allItems: CopilotItem[] = [];

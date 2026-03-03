@@ -19,7 +19,7 @@ function makeItem(overrides: Record<string, unknown> = {}) {
     return {
         id: 'test-item-1',
         name: 'test-file.md',
-        category: CopilotCategory.Prompts,
+        category: CopilotCategory.Instructions,
         file,
         repo: { owner: 'github', repo: 'awesome-copilot' },
         ...overrides,

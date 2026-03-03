@@ -1,36 +1,42 @@
 /**
  * Tests for src/types.ts
  *
- * Validates that enum values, category labels, and folder paths are
- * stable and well-formed. These tests catch accidental typos in the
- * enum values that the GitHub API depends on.
+ * Validates that enum values, category labels, folder paths, and the
+ * CATEGORY_SHOWS_DIRS set are stable and well-formed.
+ *
+ * These tests catch accidental typos in enum values that the GitHub API
+ * depends on, and drift between the three parallel Record<CopilotCategory, …>
+ * tables.
  */
 import * as assert from 'assert';
-import { CopilotCategory, CATEGORY_LABELS, FOLDER_PATHS } from '../../types';
+import { CopilotCategory, CATEGORY_LABELS, CATEGORY_SHOWS_DIRS, FOLDER_PATHS } from '../../types';
 
-const ALL_CATEGORIES: CopilotCategory[] = [
-    CopilotCategory.ChatModes,
-    CopilotCategory.Instructions,
-    CopilotCategory.Prompts,
-    CopilotCategory.Agents,
-    CopilotCategory.Skills,
-];
+// Derived at test runtime so the list stays in sync with the enum automatically.
+const ALL_CATEGORIES: CopilotCategory[] = Object.values(CopilotCategory);
 
 suite('CopilotCategory enum', () => {
-    test('ChatModes value is "chatmodes"', () => {
-        assert.strictEqual(CopilotCategory.ChatModes, 'chatmodes');
-    });
-
     test('Instructions value is "instructions"', () => {
         assert.strictEqual(CopilotCategory.Instructions, 'instructions');
     });
 
-    test('Prompts value is "prompts"', () => {
-        assert.strictEqual(CopilotCategory.Prompts, 'prompts');
-    });
-
     test('Agents value is "agents"', () => {
         assert.strictEqual(CopilotCategory.Agents, 'agents');
+    });
+
+    test('Hooks value is "hooks"', () => {
+        assert.strictEqual(CopilotCategory.Hooks, 'hooks');
+    });
+
+    test('Workflows value is "workflows"', () => {
+        assert.strictEqual(CopilotCategory.Workflows, 'workflows');
+    });
+
+    test('Plugins value is "plugins"', () => {
+        assert.strictEqual(CopilotCategory.Plugins, 'plugins');
+    });
+
+    test('Scripts value is "scripts"', () => {
+        assert.strictEqual(CopilotCategory.Scripts, 'scripts');
     });
 
     test('Skills value is "skills"', () => {
@@ -50,6 +56,10 @@ suite('CopilotCategory enum', () => {
         for (const cat of ALL_CATEGORIES) {
             assert.match(cat, /^[a-z]+$/, `Category "${cat}" must contain only lowercase letters`);
         }
+    });
+
+    test('has exactly 7 categories (Instructions, Agents, Hooks, Workflows, Plugins, Scripts, Skills)', () => {
+        assert.strictEqual(ALL_CATEGORIES.length, 7);
     });
 });
 
@@ -90,12 +100,21 @@ suite('FOLDER_PATHS', () => {
         }
     });
 
-    test('all paths start with ".github/"', () => {
+    test('all paths are top-level directory names (no leading ".github/")', () => {
         for (const cat of ALL_CATEGORIES) {
             const folderPath = FOLDER_PATHS[cat];
             assert.ok(
-                folderPath.startsWith('.github/'),
-                `Folder path for "${cat}" must start with ".github/" but got "${folderPath}"`
+                !folderPath.startsWith('.github/'),
+                `Folder path for "${cat}" must not start with ".github/" — upstream now uses top-level dirs, got "${folderPath}"`
+            );
+        }
+    });
+
+    test('all paths match the category enum value (path === category)', () => {
+        for (const cat of ALL_CATEGORIES) {
+            assert.strictEqual(
+                FOLDER_PATHS[cat], cat,
+                `FOLDER_PATHS["${cat}"] should equal "${cat}" to mirror the upstream directory name`
             );
         }
     });
@@ -121,6 +140,48 @@ suite('FOLDER_PATHS', () => {
         for (const key of Object.keys(FOLDER_PATHS)) {
             assert.ok(defined.has(key as CopilotCategory),
                 `FOLDER_PATHS has unexpected key "${key}"`);
+        }
+    });
+});
+
+suite('CATEGORY_SHOWS_DIRS', () => {
+    test('is a Set', () => {
+        assert.ok(CATEGORY_SHOWS_DIRS instanceof Set);
+    });
+
+    test('Skills is in the set (directory-based bundles)', () => {
+        assert.ok(CATEGORY_SHOWS_DIRS.has(CopilotCategory.Skills));
+    });
+
+    test('Plugins is in the set (directory-based bundles)', () => {
+        assert.ok(CATEGORY_SHOWS_DIRS.has(CopilotCategory.Plugins));
+    });
+
+    test('Instructions is NOT in the set (file-based)', () => {
+        assert.ok(!CATEGORY_SHOWS_DIRS.has(CopilotCategory.Instructions));
+    });
+
+    test('Agents is NOT in the set (file-based)', () => {
+        assert.ok(!CATEGORY_SHOWS_DIRS.has(CopilotCategory.Agents));
+    });
+
+    test('Hooks is NOT in the set (file-based)', () => {
+        assert.ok(!CATEGORY_SHOWS_DIRS.has(CopilotCategory.Hooks));
+    });
+
+    test('Workflows is NOT in the set (file-based)', () => {
+        assert.ok(!CATEGORY_SHOWS_DIRS.has(CopilotCategory.Workflows));
+    });
+
+    test('Scripts is NOT in the set (file-based)', () => {
+        assert.ok(!CATEGORY_SHOWS_DIRS.has(CopilotCategory.Scripts));
+    });
+
+    test('every entry in the set is a valid CopilotCategory', () => {
+        const valid = new Set<string>(ALL_CATEGORIES);
+        for (const entry of CATEGORY_SHOWS_DIRS) {
+            assert.ok(valid.has(entry),
+                `CATEGORY_SHOWS_DIRS contains unknown value "${entry}"`);
         }
     });
 });

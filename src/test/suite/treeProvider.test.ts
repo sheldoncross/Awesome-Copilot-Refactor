@@ -18,7 +18,6 @@ const MOCK_REPO = { owner: 'test-owner', repo: 'test-repo', label: 'Test Repo' }
 suite('PromptLibraryTreeItem — file item', () => {
     test('sets contextValue to "copilotFile"', () => {
         const file = createMockGitHubFile();
-        const item: Parameters<typeof PromptLibraryTreeItem>[0] = 'test.md' as unknown as string;
         const treeItem = new PromptLibraryTreeItem(
             'test.md',
             vscode.TreeItemCollapsibleState.None,

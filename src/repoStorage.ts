@@ -14,28 +14,29 @@ export class RepoStorage {
    * Get repository sources from VS Code settings first, then fallback to global state
    */
   static getSources(context: vscode.ExtensionContext): RepoSource[] {
-    // First try to get from VS Code settings
     const config = vscode.workspace.getConfiguration();
-    const configSources = config.get<RepoSource[]>(CONFIG_KEY);
-    
-    if (configSources && Array.isArray(configSources) && configSources.length > 0) {
-      // Sync config to global state for backward compatibility
-      context.globalState.update(STORAGE_KEY, configSources);
-      return configSources;
+    const inspection = config.inspect<RepoSource[]>(CONFIG_KEY);
+
+    // Prioritize user-set configuration (global or workspace)
+    const userSetConfig = inspection?.globalValue ?? inspection?.workspaceValue;
+    if (userSetConfig && Array.isArray(userSetConfig) && userSetConfig.length > 0) {
+      context.globalState.update(STORAGE_KEY, userSetConfig);
+      return userSetConfig;
     }
-    
-    // Fallback to global state
+
+    // Fallback to global state (for older versions)
     const raw = context.globalState.get<RepoSource[]>(STORAGE_KEY);
     if (raw && Array.isArray(raw) && raw.length > 0) {
-      // Sync global state to config
+      // Sync global state to config for forward-compatibility
       this.syncToConfig(raw);
       return raw;
     }
-    
-    // Use defaults and sync to both
-    this.syncToConfig(DEFAULT_SOURCES);
-    context.globalState.update(STORAGE_KEY, DEFAULT_SOURCES);
-    return [...DEFAULT_SOURCES];
+
+    // Use defaults and sync to both locations
+    const defaults = this.getDefaultSources();
+    this.syncToConfig(defaults);
+    context.globalState.update(STORAGE_KEY, defaults);
+    return defaults;
   }
 
   /**
